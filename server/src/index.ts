@@ -34,6 +34,7 @@ import { getAccountTransactions } from './handlers/get_account_transactions';
 import { generateSalesReport } from './handlers/generate_sales_report';
 import { generateProfitReport } from './handlers/generate_profit_report';
 import { getDashboardSummary } from './handlers/get_dashboard_summary';
+import { getUsers } from './handlers/get_users';
 import { z } from 'zod';
 
 const t = initTRPC.create({
@@ -53,6 +54,9 @@ const appRouter = router({
   createUser: publicProcedure
     .input(createUserInputSchema)
     .mutation(({ input }) => createUser(input)),
+  
+  getUsers: publicProcedure
+    .query(() => getUsers()),
 
   // Warehouse management
   createWarehouse: publicProcedure

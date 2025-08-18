@@ -10,14 +10,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, ShoppingCart, Calendar, Truck } from 'lucide-react';
 import { trpc } from '@/utils/trpc';
 import { useState, useEffect, useCallback } from 'react';
-import type { Sale, CreateSaleInput, Product, Warehouse } from '../../../server/src/schema';
+import type { Sale, CreateSaleInput, Product, Warehouse, User } from '../../../server/src/schema';
 
 export function SalesManagement() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('pos');
+  const [selectedCashierId, setSelectedCashierId] = useState<number | null>(null);
   
   const [formData, setFormData] = useState<CreateSaleInput>({
     warehouse_id: 0,
@@ -39,14 +41,16 @@ export function SalesManagement() {
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [salesData, productsData, warehousesData] = await Promise.all([
+      const [salesData, productsData, warehousesData, usersData] = await Promise.all([
         trpc.getSales.query({}),
         trpc.getProducts.query(),
-        trpc.getWarehouses.query()
+        trpc.getWarehouses.query(),
+        trpc.getUsers.query()
       ]);
       setSales(salesData);
       setProducts(productsData);
       setWarehouses(warehousesData);
+      setUsers(usersData);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
@@ -87,7 +91,8 @@ export function SalesManagement() {
     if (formData.items.length === 0) return;
 
     try {
-      const response = await trpc.createSale.mutate(formData);
+      const saleData = selectedCashierId ? { ...formData, cashierId: selectedCashierId } : formData;
+      const response = await trpc.createSale.mutate(saleData);
       setSales((prev: Sale[]) => [...prev, response]);
       setFormData({
         warehouse_id: 0,
@@ -98,6 +103,7 @@ export function SalesManagement() {
         notes: null,
         items: []
       });
+      setSelectedCashierId(null);
     } catch (error) {
       console.error('Failed to create sale:', error);
     }
@@ -200,6 +206,36 @@ export function SalesManagement() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
+                      <Label htmlFor="salesperson">Salesperson *</Label>
+                      <Select
+                        value={selectedCashierId === null ? '' : selectedCashierId.toString()}
+                        onValueChange={(value: string) =>
+                          setSelectedCashierId(parseInt(value))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select salesperson" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {users
+                            .filter((user: User) => 
+                              ['CASHIER', 'MANAGER', 'APP_ADMIN'].includes(user.role)
+                            )
+                            .map((user: User) => (
+                              <SelectItem key={user.id} value={user.id.toString()}>
+                                {user.full_name} ({user.role})
+                              </SelectItem>
+                            ))
+                          }
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div></div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
                       <Label htmlFor="customer_name">Customer Name</Label>
                       <Input
                         id="customer_name"
@@ -234,74 +270,91 @@ export function SalesManagement() {
                   <div className="border rounded-lg p-4 bg-gray-50">
                     <h4 className="font-medium mb-3">Add Items</h4>
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      <Select
-                        value={currentItem.product_id === 0 ? '' : currentItem.product_id.toString()}
-                        onValueChange={(value: string) => {
-                          const productId = parseInt(value);
-                          const product = products.find((p: Product) => p.id === productId);
-                          const price = formData.sale_type === 'WHOLESALE' 
-                            ? product?.wholesale_price || 0
-                            : product?.retail_price || 0;
-                          
-                          setCurrentItem(prev => ({
-                            ...prev,
-                            product_id: productId,
-                            unit_price: price
-                          }));
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select product" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {products.map((product: Product) => (
-                            <SelectItem key={product.id} value={product.id.toString()}>
-                              {product.name} - ${formData.sale_type === 'WHOLESALE' ? product.wholesale_price : product.retail_price}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div>
+                        <Label htmlFor="product">Product *</Label>
+                        <Select
+                          value={currentItem.product_id === 0 ? '' : currentItem.product_id.toString()}
+                          onValueChange={(value: string) => {
+                            const productId = parseInt(value);
+                            const product = products.find((p: Product) => p.id === productId);
+                            const price = formData.sale_type === 'WHOLESALE' 
+                              ? product?.wholesale_price || 0
+                              : product?.retail_price || 0;
+                            
+                            setCurrentItem(prev => ({
+                              ...prev,
+                              product_id: productId,
+                              unit_price: price
+                            }));
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select product" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products.map((product: Product) => (
+                              <SelectItem key={product.id} value={product.id.toString()}>
+                                {product.name} - ${formData.sale_type === 'WHOLESALE' ? product.wholesale_price : product.retail_price}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                      <Input
-                        type="number"
-                        placeholder="Qty"
-                        value={currentItem.quantity}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setCurrentItem(prev => ({
-                            ...prev,
-                            quantity: parseInt(e.target.value) || 1
-                          }))
-                        }
-                        min="1"
-                      />
+                      <div>
+                        <Label htmlFor="quantity">Quantity</Label>
+                        <Input
+                          id="quantity"
+                          type="number"
+                          placeholder="1"
+                          value={currentItem.quantity}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setCurrentItem(prev => ({
+                              ...prev,
+                              quantity: parseInt(e.target.value) || 1
+                            }))
+                          }
+                          min="1"
+                        />
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      <Input
-                        type="number"
-                        placeholder="Unit Price"
-                        value={currentItem.unit_price}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setCurrentItem(prev => ({
-                            ...prev,
-                            unit_price: parseFloat(e.target.value) || 0
-                          }))
-                        }
-                        step="0.01"
-                      />
+                      <div>
+                        <Label htmlFor="unit_price">Unit Price ($)</Label>
+                        <Input
+                          id="unit_price"
+                          type="number"
+                          placeholder="0.00"
+                          value={currentItem.unit_price}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setCurrentItem(prev => ({
+                              ...prev,
+                              unit_price: parseFloat(e.target.value) || 0
+                            }))
+                          }
+                          step="0.01"
+                          min="0"
+                        />
+                      </div>
 
-                      <Input
-                        type="number"
-                        placeholder="Discount"
-                        value={currentItem.discount_amount}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setCurrentItem(prev => ({
-                            ...prev,
-                            discount_amount: parseFloat(e.target.value) || 0
-                          }))
-                        }
-                        step="0.01"
-                      />
+                      <div>
+                        <Label htmlFor="discount">Item Discount ($)</Label>
+                        <Input
+                          id="discount"
+                          type="number"
+                          placeholder="0.00"
+                          value={currentItem.discount_amount}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setCurrentItem(prev => ({
+                              ...prev,
+                              discount_amount: parseFloat(e.target.value) || 0
+                            }))
+                          }
+                          step="0.01"
+                          min="0"
+                        />
+                      </div>
                     </div>
 
                     <Button
@@ -318,7 +371,7 @@ export function SalesManagement() {
                   <Button
                     type="submit"
                     className="w-full bg-green-600 hover:bg-green-700"
-                    disabled={formData.items.length === 0}
+                    disabled={formData.items.length === 0 || formData.warehouse_id === 0 || selectedCashierId === null}
                   >
                     Complete Sale - ${calculateTotal().toFixed(2)}
                   </Button>
