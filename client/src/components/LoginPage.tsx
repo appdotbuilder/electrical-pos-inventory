@@ -9,9 +9,10 @@ import type { LoginInput } from '../../../server/src/schema';
 
 interface LoginPageProps {
   onLogin: (token: string, user: any) => void;
+  onSwitchToRegister: () => void;
 }
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
   const [formData, setFormData] = useState<LoginInput>({
     username: '',
     password: ''
@@ -103,6 +104,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
+
+          <div className="mt-4 text-center">
+            <Button
+              variant="link"
+              onClick={onSwitchToRegister}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              Don't have an account? Register here
+            </Button>
+          </div>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-600 mb-3 text-center">Demo Accounts:</p>

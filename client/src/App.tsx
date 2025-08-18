@@ -1,5 +1,6 @@
 import { AuthProvider, useAuth } from '@/components/AuthContext';
 import { LoginPage } from '@/components/LoginPage';
+import { RegisterPage } from '@/components/RegisterPage';
 import { Header } from '@/components/Header';
 import { Dashboard } from '@/components/Dashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +11,7 @@ import { useState } from 'react';
 function AppContent() {
   const { isAuthenticated, isLoading, user, hasRole } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showRegister, setShowRegister] = useState(false);
 
   if (isLoading) {
     return (
@@ -23,10 +25,28 @@ function AppContent() {
   }
 
   if (!isAuthenticated) {
+    if (showRegister) {
+      return (
+        <RegisterPage 
+          onRegisterSuccess={() => {
+            setShowRegister(false);
+          }}
+          onBackToLogin={() => {
+            setShowRegister(false);
+          }}
+        />
+      );
+    }
+    
     return (
-      <LoginPage onLogin={() => {
-        // The AuthProvider will handle the state updates
-      }} />
+      <LoginPage 
+        onLogin={() => {
+          // The AuthProvider will handle the state updates
+        }}
+        onSwitchToRegister={() => {
+          setShowRegister(true);
+        }}
+      />
     );
   }
 
