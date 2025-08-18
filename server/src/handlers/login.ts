@@ -15,7 +15,7 @@ function generateToken(userId: number, role: string): string {
 
 // Simple password hashing (in production, use bcrypt)
 function hashPassword(password: string): string {
-  return Buffer.from(password).toString('base64');
+  return `hashed_${password}`;
 }
 
 function verifyPassword(password: string, hash: string): boolean {

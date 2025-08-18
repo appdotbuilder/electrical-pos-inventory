@@ -2,11 +2,12 @@
 import { db } from '../db';
 import { usersTable } from '../db/schema';
 import { type CreateUserInput, type User } from '../schema';
+import { hashPassword } from './login';
 
 export const createUser = async (input: CreateUserInput): Promise<User> => {
   try {
-    // Hash the password (simple hashing for demo - use bcrypt in production)
-    const password_hash = `hashed_${input.password}`;
+    // Hash the password using the same function as login
+    const password_hash = hashPassword(input.password);
 
     // Insert user record
     const result = await db.insert(usersTable)
