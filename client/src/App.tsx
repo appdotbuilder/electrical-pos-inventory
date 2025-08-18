@@ -1,251 +1,248 @@
-
+import { AuthProvider, useAuth } from '@/components/AuthContext';
+import { LoginPage } from '@/components/LoginPage';
+import { Header } from '@/components/Header';
+import { Dashboard } from '@/components/Dashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Package, Warehouse, ShoppingCart, TrendingUp, DollarSign, FileText } from 'lucide-react';
-import { trpc } from '@/utils/trpc';
-import { useState, useEffect, useCallback } from 'react';
-import { Dashboard } from '@/components/Dashboard';
-import { ProductManagement } from '@/components/ProductManagement';
-import { InventoryManagement } from '@/components/InventoryManagement';
-import { SalesManagement } from '@/components/SalesManagement';
-import { StockTransfers } from '@/components/StockTransfers';
-import { PackingManagement } from '@/components/PackingManagement';
-import { AccountsManagement } from '@/components/AccountsManagement';
-import { ReportsManagement } from '@/components/ReportsManagement';
-import { WarehouseManagement } from '@/components/WarehouseManagement';
-import type { DashboardSummary } from '../../server/src/handlers/get_dashboard_summary';
+import { AlertTriangle, Package, Warehouse, ShoppingCart, TrendingUp, DollarSign, FileText, Users } from 'lucide-react';
+import { useState } from 'react';
 
-// Demo data for when backend is not available
-const getDemoData = (): DashboardSummary => ({
-  total_products: 1247,
-  total_warehouses: 12,
-  low_stock_alerts: 23,
-  pending_transfers: 5,
-  pending_packing: 8,
-  today_sales_count: 47,
-  today_sales_revenue: 15420.50,
-  overdue_receivables: 3,
-  overdue_payables: 1,
-  recent_sales: [
-    {
-      id: 1,
-      sale_number: 'SALE-2024-001',
-      customer_name: 'ABC Electric Co.',
-      total_amount: 450.00,
-      sale_date: new Date(),
-      status: 'COMPLETED'
-    },
-    {
-      id: 2,
-      sale_number: 'SALE-2024-002',
-      customer_name: null,
-      total_amount: 125.75,
-      sale_date: new Date(),
-      status: 'COMPLETED'
-    },
-    {
-      id: 3,
-      sale_number: 'SALE-2024-003',
-      customer_name: 'City Power Solutions',
-      total_amount: 890.25,
-      sale_date: new Date(),
-      status: 'PENDING'
-    }
-  ],
-  top_selling_products: [
-    {
-      product_name: '12 AWG Copper Wire',
-      quantity_sold: 85,
-      revenue: 2840.00
-    },
-    {
-      product_name: 'LED Bulb 60W Equivalent',
-      quantity_sold: 234,
-      revenue: 1872.00
-    },
-    {
-      product_name: 'Circuit Breaker 20A',
-      quantity_sold: 45,
-      revenue: 1350.00
-    }
-  ]
-});
-
-function App() {
+function AppContent() {
+  const { isAuthenticated, isLoading, user, hasRole } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [backendAvailable, setBackendAvailable] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadDashboardData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setErrorMessage(null);
-      const data = await trpc.getDashboardSummary.query();
-      setDashboardData(data);
-      setBackendAvailable(true);
-    } catch (error) {
-      console.error('Failed to load dashboard data:', error);
-      setBackendAvailable(false);
-      
-      // Determine error type and set appropriate message
-      const errorStr = error instanceof Error ? error.message : String(error);
-      if (errorStr.includes('500') || errorStr.includes('Internal Server Error') || 
-          errorStr.includes('Unexpected end of JSON input') || 
-          errorStr.includes('string did not match the expected pattern')) {
-        setErrorMessage('Backend server is not running or not properly configured');
-      } else if (errorStr.includes('fetch') || errorStr.includes('connection')) {
-        setErrorMessage('Cannot connect to backend server - please check if it\'s running');
-      } else {
-        setErrorMessage('Backend server error - please check server logs');
-      }
-      
-      // Show demo data after a short delay to demonstrate the UI
-      setTimeout(() => {
-        setDashboardData(getDemoData());
-      }, 1500);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin text-6xl mb-4">⚡</div>
+          <p className="text-gray-600">Loading ElectroStore POS...</p>
+        </div>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    if (activeTab === 'dashboard') {
-      loadDashboardData();
-    }
-  }, [activeTab, loadDashboardData]);
+  if (!isAuthenticated) {
+    return (
+      <LoginPage onLogin={() => {
+        // The AuthProvider will handle the state updates
+      }} />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <Header />
+      
       <div className="container mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                ⚡ ElectroStore POS & Inventory
-              </h1>
-              <p className="text-gray-600">Complete management system for electrical store operations</p>
-              {!backendAvailable && (
-                <div className="mt-2 flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-                    🚀 Demo Mode - Showing sample data
-                  </Badge>
-                  {errorMessage && (
-                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                      ⚠️ {errorMessage}
-                    </Badge>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              {dashboardData && (
-                <div className="flex space-x-2">
-                  {dashboardData.low_stock_alerts > 0 && (
-                    <Badge variant="destructive" className="flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" />
-                      {dashboardData.low_stock_alerts} Low Stock
-                    </Badge>
-                  )}
-                  {dashboardData.pending_transfers > 0 && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
-                      <Package className="h-3 w-3" />
-                      {dashboardData.pending_transfers} Pending
-                    </Badge>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Main Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-9 w-full bg-white shadow-sm border">
+          <TabsList className="grid grid-cols-auto w-full bg-white shadow-sm border overflow-x-auto">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Dashboard
             </TabsTrigger>
-            <TabsTrigger value="products" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Products
-            </TabsTrigger>
-            <TabsTrigger value="inventory" className="flex items-center gap-2">
-              <Warehouse className="h-4 w-4" />
-              Inventory
-            </TabsTrigger>
-            <TabsTrigger value="sales" className="flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              Sales
-            </TabsTrigger>
-            <TabsTrigger value="transfers" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Transfers
-            </TabsTrigger>
-            <TabsTrigger value="packing" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Packing
-            </TabsTrigger>
-            <TabsTrigger value="accounts" className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Accounts
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Reports
-            </TabsTrigger>
-            <TabsTrigger value="warehouses" className="flex items-center gap-2">
-              <Warehouse className="h-4 w-4" />
-              Warehouses
-            </TabsTrigger>
+            
+            {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+              <TabsTrigger value="products" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Products
+              </TabsTrigger>
+            )}
+            
+            {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+              <TabsTrigger value="inventory" className="flex items-center gap-2">
+                <Warehouse className="h-4 w-4" />
+                Inventory
+              </TabsTrigger>
+            )}
+            
+            {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('CASHIER')) && (
+              <TabsTrigger value="sales" className="flex items-center gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                Sales
+              </TabsTrigger>
+            )}
+            
+            {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+              <TabsTrigger value="transfers" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Transfers
+              </TabsTrigger>
+            )}
+            
+            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER', 'WAREHOUSE']) && (
+              <TabsTrigger value="packing" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Packing
+              </TabsTrigger>
+            )}
+            
+            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+              <TabsTrigger value="accounts" className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Accounts
+              </TabsTrigger>
+            )}
+            
+            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+              <TabsTrigger value="reports" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Reports
+              </TabsTrigger>
+            )}
+            
+            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+              <TabsTrigger value="warehouses" className="flex items-center gap-2">
+                <Warehouse className="h-4 w-4" />
+                Warehouses
+              </TabsTrigger>
+            )}
+            
+            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN']) && (
+              <TabsTrigger value="users" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Users
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="dashboard">
-            <Dashboard 
-              data={dashboardData} 
-              isLoading={isLoading} 
-              onRefresh={loadDashboardData}
-              backendAvailable={backendAvailable}
-              errorMessage={errorMessage}
-            />
+            <Dashboard />
           </TabsContent>
 
-          <TabsContent value="products">
-            <ProductManagement />
-          </TabsContent>
+          {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+            <TabsContent value="products">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📦</div>
+                <h3 className="text-xl font-semibold mb-2">Product Management</h3>
+                <p className="text-gray-600">
+                  Manage your electrical products, SKUs, pricing, and categories.
+                </p>
+                <Badge className="mt-4">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
 
-          <TabsContent value="inventory">
-            <InventoryManagement />
-          </TabsContent>
+          {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+            <TabsContent value="inventory">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🏪</div>
+                <h3 className="text-xl font-semibold mb-2">Inventory Management</h3>
+                <p className="text-gray-600">
+                  Track stock levels across warehouses and manage reorder points.
+                </p>
+                <Badge className="mt-4">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
 
-          <TabsContent value="sales">
-            <SalesManagement />
-          </TabsContent>
+          {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('CASHIER')) && (
+            <TabsContent value="sales">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">💰</div>
+                <h3 className="text-xl font-semibold mb-2">Sales Management</h3>
+                <p className="text-gray-600">
+                  Process retail, wholesale, and online sales with commission tracking.
+                </p>
+                {hasRole('CASHIER') && user?.commission_rate && (
+                  <Badge className="mt-4 bg-green-100 text-green-800">
+                    Your Commission: {user.commission_rate}%
+                  </Badge>
+                )}
+                <Badge className="mt-4 ml-2">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
 
-          <TabsContent value="transfers">
-            <StockTransfers />
-          </TabsContent>
+          {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+            <TabsContent value="transfers">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🔄</div>
+                <h3 className="text-xl font-semibold mb-2">Stock Transfers</h3>
+                <p className="text-gray-600">
+                  Manage inter-warehouse stock transfers and track shipments.
+                </p>
+                <Badge className="mt-4">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
 
-          <TabsContent value="packing">
-            <PackingManagement />
-          </TabsContent>
+          {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER', 'WAREHOUSE']) && (
+            <TabsContent value="packing">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📦</div>
+                <h3 className="text-xl font-semibold mb-2">Packing Management</h3>
+                <p className="text-gray-600">
+                  Track packing progress and manage shipments for online orders.
+                </p>
+                <Badge className="mt-4">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
 
-          <TabsContent value="accounts">
-            <AccountsManagement />
-          </TabsContent>
+          {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+            <TabsContent value="accounts">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">💸</div>
+                <h3 className="text-xl font-semibold mb-2">Accounts Management</h3>
+                <p className="text-gray-600">
+                  Manage accounts receivable and payable, track payments.
+                </p>
+                <Badge className="mt-4">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
 
-          <TabsContent value="reports">
-            <ReportsManagement />
-          </TabsContent>
+          {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+            <TabsContent value="reports">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📊</div>
+                <h3 className="text-xl font-semibold mb-2">Reports & Analytics</h3>
+                <p className="text-gray-600">
+                  Generate sales reports, profit analysis, and business insights.
+                </p>
+                <Badge className="mt-4">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
 
-          <TabsContent value="warehouses">
-            <WarehouseManagement />
-          </TabsContent>
+          {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+            <TabsContent value="warehouses">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🏭</div>
+                <h3 className="text-xl font-semibold mb-2">Warehouse Management</h3>
+                <p className="text-gray-600">
+                  Configure warehouses, assign managers, and set up locations.
+                </p>
+                <Badge className="mt-4">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
+
+          {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN']) && (
+            <TabsContent value="users">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">👥</div>
+                <h3 className="text-xl font-semibold mb-2">User Management</h3>
+                <p className="text-gray-600">
+                  Manage user accounts, roles, and permissions.
+                </p>
+                <Badge className="mt-4">Coming Soon</Badge>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

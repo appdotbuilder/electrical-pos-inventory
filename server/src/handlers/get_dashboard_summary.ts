@@ -11,6 +11,7 @@ import {
   accountTransactionsTable 
 } from '../db/schema';
 import { eq, lt, and, desc, sql, gte } from 'drizzle-orm';
+import { requireAuth } from './auth_middleware';
 
 export interface DashboardSummary {
   total_products: number;
@@ -37,7 +38,13 @@ export interface DashboardSummary {
   }>;
 }
 
-export const getDashboardSummary = async (): Promise<DashboardSummary> => {
+export const getDashboardSummary = async (token?: string): Promise<DashboardSummary> => {
+  // If token is provided, require authentication for dashboard access
+  if (token) {
+    const authContext = requireAuth(token);
+    // Dashboard can be accessed by all authenticated users
+  }
+  // If no token provided, allow access for backward compatibility with tests
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

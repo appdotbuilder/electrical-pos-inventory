@@ -304,3 +304,37 @@ export const profitReportInputSchema = z.object({
 });
 
 export type ProfitReportInput = z.infer<typeof profitReportInputSchema>;
+
+// Authentication schemas
+export const loginInputSchema = z.object({
+  username: z.string(),
+  password: z.string()
+});
+
+export type LoginInput = z.infer<typeof loginInputSchema>;
+
+export const authenticatedUserSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  email: z.string(),
+  full_name: z.string(),
+  role: userRoleEnum,
+  is_active: z.boolean(),
+  commission_rate: z.number().nullable()
+});
+
+export type AuthenticatedUser = z.infer<typeof authenticatedUserSchema>;
+
+export const loginResponseSchema = z.object({
+  token: z.string(),
+  user: z.object({
+    id: z.number(),
+    username: z.string(),
+    email: z.string(),
+    full_name: z.string(),
+    role: z.string(),
+    is_active: z.boolean()
+  })
+});
+
+export type LoginResponse = z.infer<typeof loginResponseSchema>;

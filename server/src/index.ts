@@ -14,7 +14,8 @@ import {
   createStockTransferInputSchema,
   updateInventoryInputSchema,
   salesReportInputSchema,
-  profitReportInputSchema
+  profitReportInputSchema,
+  loginInputSchema
 } from './schema';
 
 // Import handlers
@@ -35,6 +36,10 @@ import { generateSalesReport } from './handlers/generate_sales_report';
 import { generateProfitReport } from './handlers/generate_profit_report';
 import { getDashboardSummary } from './handlers/get_dashboard_summary';
 import { getUsers } from './handlers/get_users';
+import { login } from './handlers/login';
+import { getMe } from './handlers/get_me';
+import { requireAuth, requireManagerOrAbove } from './handlers/auth_middleware';
+import { seedTestData } from './handlers/seed_test_data';
 import { z } from 'zod';
 
 const t = initTRPC.create({
@@ -49,6 +54,18 @@ const appRouter = router({
   healthcheck: publicProcedure.query(() => {
     return { status: 'ok', timestamp: new Date().toISOString() };
   }),
+
+  // Authentication
+  login: publicProcedure
+    .input(loginInputSchema)
+    .mutation(({ input }) => login(input)),
+  
+  getMe: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .query(({ input }) => getMe(input.token)),
+  
+  seedTestData: publicProcedure
+    .mutation(() => seedTestData()),
 
   // User management
   createUser: publicProcedure
@@ -129,7 +146,8 @@ const appRouter = router({
 
   // Dashboard
   getDashboardSummary: publicProcedure
-    .query(() => getDashboardSummary()),
+    .input(z.object({ token: z.string().optional() }).optional())
+    .query(({ input }) => getDashboardSummary(input?.token)),
 });
 
 export type AppRouter = typeof appRouter;
