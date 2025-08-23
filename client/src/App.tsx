@@ -57,75 +57,107 @@ function AppContent() {
       <div className="container mx-auto p-6">
         {/* Main Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-auto w-full bg-white shadow-sm border overflow-x-auto">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            
-            {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
-              <TabsTrigger value="products" className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Products
+          <div className="bg-white rounded-lg shadow-sm border">
+            <TabsList className="flex items-center w-full bg-transparent p-2 space-x-1 overflow-x-auto">
+              <TabsTrigger 
+                value="dashboard" 
+                className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-blue-50"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Dashboard
               </TabsTrigger>
-            )}
-            
-            {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
-              <TabsTrigger value="inventory" className="flex items-center gap-2">
-                <Warehouse className="h-4 w-4" />
-                Inventory
-              </TabsTrigger>
-            )}
-            
-            {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('CASHIER')) && (
-              <TabsTrigger value="sales" className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4" />
-                Sales
-              </TabsTrigger>
-            )}
-            
-            {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
-              <TabsTrigger value="transfers" className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Transfers
-              </TabsTrigger>
-            )}
-            
-            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER', 'WAREHOUSE']) && (
-              <TabsTrigger value="packing" className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Packing
-              </TabsTrigger>
-            )}
-            
-            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
-              <TabsTrigger value="accounts" className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Accounts
-              </TabsTrigger>
-            )}
-            
-            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
-              <TabsTrigger value="reports" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Reports
-              </TabsTrigger>
-            )}
-            
-            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
-              <TabsTrigger value="warehouses" className="flex items-center gap-2">
-                <Warehouse className="h-4 w-4" />
-                Warehouses
-              </TabsTrigger>
-            )}
-            
-            {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN']) && (
-              <TabsTrigger value="users" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Users
-              </TabsTrigger>
-            )}
-          </TabsList>
+              
+              {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+                <TabsTrigger 
+                  value="products" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-blue-50"
+                >
+                  <Package className="h-4 w-4" />
+                  Products
+                </TabsTrigger>
+              )}
+              
+              {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+                <TabsTrigger 
+                  value="inventory" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-blue-50"
+                >
+                  <Warehouse className="h-4 w-4" />
+                  Inventory
+                </TabsTrigger>
+              )}
+              
+              {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('CASHIER')) && (
+                <TabsTrigger 
+                  value="sales" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-green-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-green-50"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  Sales
+                </TabsTrigger>
+              )}
+              
+              {(hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) || hasRole('WAREHOUSE')) && (
+                <TabsTrigger 
+                  value="transfers" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-purple-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-purple-50"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  Transfers
+                </TabsTrigger>
+              )}
+              
+              {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER', 'WAREHOUSE']) && (
+                <TabsTrigger 
+                  value="packing" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-orange-50"
+                >
+                  <Package className="h-4 w-4" />
+                  Packing
+                </TabsTrigger>
+              )}
+              
+              {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+                <TabsTrigger 
+                  value="accounts" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-emerald-50"
+                >
+                  <DollarSign className="h-4 w-4" />
+                  Accounts
+                </TabsTrigger>
+              )}
+              
+              {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+                <TabsTrigger 
+                  value="reports" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-indigo-50"
+                >
+                  <FileText className="h-4 w-4" />
+                  Reports
+                </TabsTrigger>
+              )}
+              
+              {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
+                <TabsTrigger 
+                  value="warehouses" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-teal-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-teal-50"
+                >
+                  <Warehouse className="h-4 w-4" />
+                  Warehouses
+                </TabsTrigger>
+              )}
+              
+              {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN']) && (
+                <TabsTrigger 
+                  value="users" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-red-50"
+                >
+                  <Users className="h-4 w-4" />
+                  Users
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
 
           <TabsContent value="dashboard">
             <Dashboard />
