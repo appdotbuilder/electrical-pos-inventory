@@ -244,10 +244,33 @@ export const createProductInputSchema = z.object({
   cost_price: z.number().positive(),
   retail_price: z.number().positive(),
   wholesale_price: z.number().positive(),
-  minimum_stock_level: z.number().min(0)
+  minimum_stock_level: z.number().min(0),
+  is_active: z.boolean().optional()
 });
 
 export type CreateProductInput = z.infer<typeof createProductInputSchema>;
+
+export const updateProductInputSchema = z.object({
+  id: z.number(),
+  sku: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  category_id: z.number().nullable(),
+  base_unit: z.string(),
+  cost_price: z.number().positive(),
+  retail_price: z.number().positive(),
+  wholesale_price: z.number().positive(),
+  minimum_stock_level: z.number().min(0),
+  is_active: z.boolean()
+});
+
+export type UpdateProductInput = z.infer<typeof updateProductInputSchema>;
+
+export const deleteProductInputSchema = z.object({
+  id: z.number()
+});
+
+export type DeleteProductInput = z.infer<typeof deleteProductInputSchema>;
 
 export const createSaleInputSchema = z.object({
   warehouse_id: z.number(),

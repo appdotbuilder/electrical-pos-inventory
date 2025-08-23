@@ -17,7 +17,8 @@ export const createProduct = async (input: CreateProductInput): Promise<Product>
         cost_price: input.cost_price.toString(),
         retail_price: input.retail_price.toString(),
         wholesale_price: input.wholesale_price.toString(),
-        minimum_stock_level: input.minimum_stock_level
+        minimum_stock_level: input.minimum_stock_level,
+        is_active: input.is_active ?? true
       })
       .returning()
       .execute();

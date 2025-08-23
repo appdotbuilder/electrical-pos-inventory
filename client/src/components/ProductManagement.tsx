@@ -7,16 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, Edit, Package, Zap } from 'lucide-react';
+import { Plus, Search, Edit, Package, Zap, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { trpc } from '@/utils/trpc';
 import { useState, useEffect, useCallback } from 'react';
-import type { Product, CreateProductInput } from '../../../server/src/schema';
+import type { Product, CreateProductInput, UpdateProductInput } from '../../../server/src/schema';
 
 export function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<CreateProductInput>({
     sku: '',
     name: '',
@@ -26,7 +29,21 @@ export function ProductManagement() {
     cost_price: 0,
     retail_price: 0,
     wholesale_price: 0,
-    minimum_stock_level: 0
+    minimum_stock_level: 0,
+    is_active: true
+  });
+  const [editFormData, setEditFormData] = useState<UpdateProductInput>({
+    id: 0,
+    sku: '',
+    name: '',
+    description: null,
+    category_id: null,
+    base_unit: 'pcs',
+    cost_price: 0,
+    retail_price: 0,
+    wholesale_price: 0,
+    minimum_stock_level: 0,
+    is_active: true
   });
 
   const loadProducts = useCallback(async () => {
@@ -59,11 +76,55 @@ export function ProductManagement() {
         cost_price: 0,
         retail_price: 0,
         wholesale_price: 0,
-        minimum_stock_level: 0
+        minimum_stock_level: 0,
+        is_active: true
       });
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Failed to create product:', error);
+    }
+  };
+
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setEditFormData({
+      id: product.id,
+      sku: product.sku,
+      name: product.name,
+      description: product.description,
+      category_id: product.category_id,
+      base_unit: product.base_unit,
+      cost_price: product.cost_price,
+      retail_price: product.retail_price,
+      wholesale_price: product.wholesale_price,
+      minimum_stock_level: product.minimum_stock_level,
+      is_active: product.is_active
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await trpc.updateProduct.mutate(editFormData);
+      setProducts((prev: Product[]) => 
+        prev.map((p: Product) => p.id === response.id ? response : p)
+      );
+      setIsEditDialogOpen(false);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error('Failed to update product:', error);
+    }
+  };
+
+  const handleDelete = async (productId: number) => {
+    try {
+      await trpc.deleteProduct.mutate({ id: productId });
+      setProducts((prev: Product[]) => 
+        prev.filter((p: Product) => p.id !== productId)
+      );
+    } catch (error) {
+      console.error('Failed to delete product:', error);
     }
   };
 
@@ -239,8 +300,206 @@ export function ProductManagement() {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="is_active">Status *</Label>
+                <Select
+                  value={formData.is_active !== undefined ? (formData.is_active ? 'true' : 'false') : 'true'}
+                  onValueChange={(value: string) =>
+                    setFormData((prev: CreateProductInput) => ({ 
+                      ...prev, 
+                      is_active: value === 'true' 
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button type="submit" className="w-full">
                 Create Product
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Product Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+              <DialogDescription>
+                Update product information
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div>
+                <Label htmlFor="edit_sku">SKU *</Label>
+                <Input
+                  id="edit_sku"
+                  placeholder="e.g., WIRE-12AWG-100M"
+                  value={editFormData.sku}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditFormData((prev: UpdateProductInput) => ({ ...prev, sku: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit_name">Product Name *</Label>
+                <Input
+                  id="edit_name"
+                  placeholder="e.g., 12 AWG Copper Wire"
+                  value={editFormData.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditFormData((prev: UpdateProductInput) => ({ ...prev, name: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit_description">Description</Label>
+                <Input
+                  id="edit_description"
+                  placeholder="Product description (optional)"
+                  value={editFormData.description || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditFormData((prev: UpdateProductInput) => ({
+                      ...prev,
+                      description: e.target.value || null
+                    }))
+                  }
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit_base_unit">Base Unit *</Label>
+                <Select
+                  value={editFormData.base_unit || 'pcs'}
+                  onValueChange={(value: string) =>
+                    setEditFormData((prev: UpdateProductInput) => ({ ...prev, base_unit: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {electricalUnits.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label htmlFor="edit_cost_price">Cost Price *</Label>
+                  <Input
+                    id="edit_cost_price"
+                    type="number"
+                    placeholder="0.00"
+                    value={editFormData.cost_price}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEditFormData((prev: UpdateProductInput) => ({ 
+                        ...prev, 
+                        cost_price: parseFloat(e.target.value) || 0 
+                      }))
+                    }
+                    step="0.01"
+                    min="0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_retail_price">Retail Price *</Label>
+                  <Input
+                    id="edit_retail_price"
+                    type="number"
+                    placeholder="0.00"
+                    value={editFormData.retail_price}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEditFormData((prev: UpdateProductInput) => ({ 
+                        ...prev, 
+                        retail_price: parseFloat(e.target.value) || 0 
+                      }))
+                    }
+                    step="0.01"
+                    min="0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit_wholesale_price">Wholesale *</Label>
+                  <Input
+                    id="edit_wholesale_price"
+                    type="number"
+                    placeholder="0.00"
+                    value={editFormData.wholesale_price}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEditFormData((prev: UpdateProductInput) => ({ 
+                        ...prev, 
+                        wholesale_price: parseFloat(e.target.value) || 0 
+                      }))
+                    }
+                    step="0.01"
+                    min="0"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit_minimum_stock_level">Minimum Stock Level *</Label>
+                <Input
+                  id="edit_minimum_stock_level"
+                  type="number"
+                  placeholder="0"
+                  value={editFormData.minimum_stock_level}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditFormData((prev: UpdateProductInput) => ({ 
+                      ...prev, 
+                      minimum_stock_level: parseInt(e.target.value) || 0 
+                    }))
+                  }
+                  min="0"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit_is_active">Status *</Label>
+                <Select
+                  value={editFormData.is_active ? 'true' : 'false'}
+                  onValueChange={(value: string) =>
+                    setEditFormData((prev: UpdateProductInput) => ({ 
+                      ...prev, 
+                      is_active: value === 'true' 
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button type="submit" className="w-full">
+                Update Product
               </Button>
             </form>
           </DialogContent>
@@ -328,9 +587,39 @@ export function ProductManagement() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{product.name}"? This action cannot be undone and will also remove associated inventory records.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(product.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

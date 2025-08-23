@@ -10,6 +10,8 @@ import {
   createUserInputSchema,
   createWarehouseInputSchema,
   createProductInputSchema,
+  updateProductInputSchema,
+  deleteProductInputSchema,
   createSaleInputSchema,
   createStockTransferInputSchema,
   updateInventoryInputSchema,
@@ -22,6 +24,8 @@ import {
 import { createUser } from './handlers/create_user';
 import { createWarehouse } from './handlers/create_warehouse';
 import { createProduct } from './handlers/create_product';
+import { updateProduct } from './handlers/update_product';
+import { deleteProduct } from './handlers/delete_product';
 import { createSale } from './handlers/create_sale';
 import { createStockTransfer } from './handlers/create_stock_transfer';
 import { updateInventory } from './handlers/update_inventory';
@@ -87,6 +91,14 @@ const appRouter = router({
   createProduct: publicProcedure
     .input(createProductInputSchema)
     .mutation(({ input }) => createProduct(input)),
+  
+  updateProduct: publicProcedure
+    .input(updateProductInputSchema)
+    .mutation(({ input }) => updateProduct(input)),
+  
+  deleteProduct: publicProcedure
+    .input(deleteProductInputSchema)
+    .mutation(({ input }) => deleteProduct(input)),
   
   getProducts: publicProcedure
     .query(() => getProducts()),
