@@ -314,12 +314,12 @@ export function ProductManagement() {
                       </div>
                     </TableCell>
                     <TableCell>{product.base_unit}</TableCell>
-                    <TableCell>${product.cost_price.toFixed(2)}</TableCell>
+                    <TableCell>Rp {product.cost_price.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell className="font-medium text-green-600">
-                      ${product.retail_price.toFixed(2)}
+                      Rp {product.retail_price.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell className="font-medium text-blue-600">
-                      ${product.wholesale_price.toFixed(2)}
+                      Rp {product.wholesale_price.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell>{product.minimum_stock_level}</TableCell>
                     <TableCell>

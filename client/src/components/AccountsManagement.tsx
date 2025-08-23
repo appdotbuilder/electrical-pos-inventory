@@ -94,7 +94,7 @@ export function AccountsManagement() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-green-100">Total Receivables</p>
-                <p className="text-2xl font-bold">${totalReceivables.toFixed(2)}</p>
+                <p className="text-2xl font-bold">Rp {totalReceivables.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <TrendingUp className="h-8 w-8" />
             </div>
@@ -106,7 +106,7 @@ export function AccountsManagement() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-red-100">Total Payables</p>
-                <p className="text-2xl font-bold">${totalPayables.toFixed(2)}</p>
+                <p className="text-2xl font-bold">Rp {totalPayables.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <TrendingDown className="h-8 w-8" />
             </div>
@@ -162,7 +162,7 @@ export function AccountsManagement() {
                           <p className="text-sm text-gray-600">{transaction.description}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-red-600">${transaction.amount.toFixed(2)}</p>
+                          <p className="font-bold text-red-600">Rp {transaction.amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                           <p className="text-xs text-gray-500">
                             Due: {transaction.due_date.toLocaleDateString()}
                           </p>
@@ -186,7 +186,7 @@ export function AccountsManagement() {
                           <p className="text-sm text-gray-600">{transaction.description}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-red-600">${transaction.amount.toFixed(2)}</p>
+                          <p className="font-bold text-red-600">Rp {transaction.amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                           <p className="text-xs text-gray-500">
                             Due: {transaction.due_date.toLocaleDateString()}
                           </p>
@@ -360,7 +360,7 @@ function TransactionTable({ transactions, isLoading, getStatusColor, isOverdue }
             <TableCell>{transaction.description}</TableCell>
             <TableCell className="font-bold">
               <span className={transaction.type === 'RECEIVABLE' ? 'text-green-600' : 'text-red-600'}>
-                ${transaction.amount.toFixed(2)}
+                Rp {transaction.amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </TableCell>
             <TableCell>

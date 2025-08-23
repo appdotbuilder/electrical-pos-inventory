@@ -294,7 +294,7 @@ export function SalesManagement() {
                           <SelectContent>
                             {products.map((product: Product) => (
                               <SelectItem key={product.id} value={product.id.toString()}>
-                                {product.name} - ${formData.sale_type === 'WHOLESALE' ? product.wholesale_price : product.retail_price}
+                                {product.name} - Rp {(formData.sale_type === 'WHOLESALE' ? product.wholesale_price : product.retail_price).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -321,7 +321,7 @@ export function SalesManagement() {
 
                     <div className="grid grid-cols-2 gap-2 mb-3">
                       <div>
-                        <Label htmlFor="unit_price">Unit Price ($)</Label>
+                        <Label htmlFor="unit_price">Unit Price (Rp)</Label>
                         <Input
                           id="unit_price"
                           type="number"
@@ -339,7 +339,7 @@ export function SalesManagement() {
                       </div>
 
                       <div>
-                        <Label htmlFor="discount">Item Discount ($)</Label>
+                        <Label htmlFor="discount">Item Discount (Rp)</Label>
                         <Input
                           id="discount"
                           type="number"
@@ -373,7 +373,7 @@ export function SalesManagement() {
                     className="w-full bg-green-600 hover:bg-green-700"
                     disabled={formData.items.length === 0 || formData.warehouse_id === 0 || selectedCashierId === null}
                   >
-                    Complete Sale - ${calculateTotal().toFixed(2)}
+                    Complete Sale - Rp {calculateTotal().toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </Button>
                 </form>
               </CardContent>
@@ -398,12 +398,12 @@ export function SalesManagement() {
                           <div>
                             <p className="font-medium">{product?.name}</p>
                             <p className="text-sm text-gray-600">
-                              {item.quantity} × ${item.unit_price.toFixed(2)}
-                              {item.discount_amount > 0 && ` - $${item.discount_amount.toFixed(2)}`}
+                              {item.quantity} × Rp {item.unit_price.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              {item.discount_amount > 0 && ` - Rp ${item.discount_amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold">${lineTotal.toFixed(2)}</p>
+                            <p className="font-bold">Rp {lineTotal.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -425,12 +425,12 @@ export function SalesManagement() {
                       <div className="flex justify-between items-center">
                         <p className="text-lg font-bold">Total:</p>
                         <p className="text-xl font-bold text-green-600">
-                          ${calculateTotal().toFixed(2)}
+                          Rp {calculateTotal().toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                       {formData.sale_type === 'WHOLESALE' && (
                         <p className="text-sm text-blue-600">
-                          💰 Commission: ${(calculateTotal() * 0.05).toFixed(2)} (5%)
+                          💰 Commission: Rp {(calculateTotal() * 0.05).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (5%)
                         </p>
                       )}
                     </div>
@@ -552,7 +552,7 @@ export function SalesManagement() {
                   className="w-full bg-blue-600 hover:bg-blue-700"
                   disabled={formData.items.length === 0 || !formData.tracking_number}
                 >
-                  Create Online Order - ${calculateTotal().toFixed(2)}
+                  Create Online Order - Rp {calculateTotal().toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Button>
               </form>
             </CardContent>
@@ -619,7 +619,7 @@ export function SalesManagement() {
                           </Badge>
                         </TableCell>
                         <TableCell className="font-bold text-green-600">
-                          ${sale.total_amount.toFixed(2)}
+                          Rp {sale.total_amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell>{sale.sale_date.toLocaleDateString()}</TableCell>
                         <TableCell>

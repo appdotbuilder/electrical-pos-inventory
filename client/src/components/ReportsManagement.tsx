@@ -233,7 +233,7 @@ export function ReportsManagement() {
                       <div className="bg-green-50 p-4 rounded-lg">
                         <p className="text-sm text-green-600">Total Revenue</p>
                         <p className="text-2xl font-bold text-green-700">
-                          ${salesReportData.total_revenue.toFixed(2)}
+                          Rp {salesReportData.total_revenue.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                     </div>
@@ -242,13 +242,13 @@ export function ReportsManagement() {
                       <div className="bg-purple-50 p-4 rounded-lg">
                         <p className="text-sm text-purple-600">Total Profit</p>
                         <p className="text-2xl font-bold text-purple-700">
-                          ${salesReportData.total_profit.toFixed(2)}
+                          Rp {salesReportData.total_profit.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                       <div className="bg-orange-50 p-4 rounded-lg">
                         <p className="text-sm text-orange-600">Average Sale</p>
                         <p className="text-2xl font-bold text-orange-700">
-                          ${salesReportData.average_sale_value.toFixed(2)}
+                          Rp {salesReportData.average_sale_value.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                     </div>
@@ -276,7 +276,7 @@ export function ReportsManagement() {
                                 <p className="font-medium">{product.product_name}</p>
                                 <p className="text-sm text-gray-600">{product.quantity_sold} units</p>
                               </div>
-                              <p className="font-bold text-green-600">${product.revenue.toFixed(2)}</p>
+                              <p className="font-bold text-green-600">Rp {product.revenue.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                             </div>
                           ))}
                         </div>
@@ -390,7 +390,7 @@ export function ReportsManagement() {
                       <div className="bg-green-50 p-4 rounded-lg">
                         <p className="text-sm text-green-600">Gross Profit</p>
                         <p className="text-2xl font-bold text-green-700">
-                          ${profitReportData.gross_profit.toFixed(2)}
+                          Rp {profitReportData.gross_profit.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                       <div className="bg-blue-50 p-4 rounded-lg">
@@ -405,13 +405,13 @@ export function ReportsManagement() {
                       <div className="bg-purple-50 p-4 rounded-lg">
                         <p className="text-sm text-purple-600">Total Revenue</p>
                         <p className="text-2xl font-bold text-purple-700">
-                          ${profitReportData.total_revenue.toFixed(2)}
+                          Rp {profitReportData.total_revenue.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                       <div className="bg-red-50 p-4 rounded-lg">
                         <p className="text-sm text-red-600">Total Cost</p>
                         <p className="text-2xl font-bold text-red-700">
-                          ${profitReportData.total_cost.toFixed(2)}
+                          Rp {profitReportData.total_cost.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                     </div>
@@ -440,7 +440,7 @@ export function ReportsManagement() {
                                     {product.quantity_sold} units • {(product.margin * 100).toFixed(1)}% margin
                                   </p>
                                 </div>
-                                <p className="font-bold text-green-600">${product.profit.toFixed(2)}</p>
+                                <p className="font-bold text-green-600">Rp {product.profit.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                               </div>
                             ))}
                         </div>
@@ -461,8 +461,8 @@ export function ReportsManagement() {
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="font-bold text-green-600">${warehouse.profit.toFixed(2)}</p>
-                                <p className="text-sm text-gray-600">${warehouse.revenue.toFixed(2)} revenue</p>
+                                <p className="font-bold text-green-600">Rp {warehouse.profit.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                <p className="text-sm text-gray-600">Rp {warehouse.revenue.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} revenue</p>
                               </div>
                             </div>
                           ))}
@@ -544,7 +544,7 @@ export function ReportsManagement() {
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
                     <p className="text-sm text-green-600">Total Value</p>
-                    <p className="text-2xl font-bold text-green-700">$-</p>
+                    <p className="text-2xl font-bold text-green-700">Rp -</p>
                     <p className="text-xs text-gray-500">At cost price</p>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">

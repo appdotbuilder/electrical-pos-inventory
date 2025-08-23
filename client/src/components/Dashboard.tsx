@@ -135,7 +135,7 @@ export function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{summary.today_sales_count}</div>
             <p className="text-xs text-gray-500">
-              ${summary.today_sales_revenue.toFixed(2)} revenue
+              Rp {summary.today_sales_revenue.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} revenue
             </p>
           </CardContent>
         </Card>
@@ -210,7 +210,7 @@ export function Dashboard() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">
-                          ${sale.total_amount.toFixed(2)}
+                          Rp {sale.total_amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                         <Badge variant="outline" className="text-xs">
                           {sale.status}
@@ -244,7 +244,7 @@ export function Dashboard() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium">
-                          ${product.revenue.toFixed(2)}
+                          Rp {product.revenue.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
                     </div>

@@ -11,6 +11,7 @@ import { PackingManagement } from '@/components/PackingManagement';
 import { AccountsManagement } from '@/components/AccountsManagement';
 import { WarehouseManagement } from '@/components/WarehouseManagement';
 import { UserManagement } from '@/components/UserManagement';
+import { ReportsManagement } from '@/components/ReportsManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Package, Warehouse, ShoppingCart, TrendingUp, DollarSign, FileText, Users } from 'lucide-react';
@@ -209,21 +210,7 @@ function AppContent() {
 
           {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN', 'MANAGER']) && (
             <TabsContent value="reports">
-              <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-6 w-6 text-indigo-500" />
-                  <h2 className="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-                </div>
-                <p className="text-gray-600">Generate comprehensive business reports and insights</p>
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📊</div>
-                  <h3 className="text-xl font-semibold mb-2">Advanced Reporting Suite</h3>
-                  <p className="text-gray-600">
-                    Sales reports, profit analysis, inventory insights, and performance analytics.
-                  </p>
-                  <Badge className="mt-4 bg-indigo-100 text-indigo-700">Coming Soon</Badge>
-                </div>
-              </div>
+              <ReportsManagement />
             </TabsContent>
           )}
 
