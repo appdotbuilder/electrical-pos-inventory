@@ -13,7 +13,7 @@ export const seedTestData = async () => {
     const testUsers = [
       {
         username: 'admin',
-        email: 'admin@example.com',
+        email: 'andy159915@gmail.com',
         password_hash: hashPassword('admin123'),
         full_name: 'System Administrator',
         role: 'SYSTEM_ADMIN' as const,
