@@ -63,11 +63,11 @@ export function Header() {
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-2xl font-bold text-white tracking-tight">
                   ElectroStore POS
                 </h1>
-                <p className="text-xs text-blue-200">
-                  Inventory Management System
+                <p className="text-xs text-blue-200 font-medium">
+                  Professional Inventory Management System
                 </p>
               </div>
             </div>
@@ -138,7 +138,7 @@ export function Header() {
                 
                 {hasRole(['SYSTEM_ADMIN', 'APP_ADMIN']) && (
                   <>
-                    <DropdownMenuItem className="py-3">
+                    <DropdownMenuItem className="py-3 cursor-pointer hover:bg-gray-100">
                       <div className="flex items-center space-x-3">
                         <span className="text-lg">🔧</span>
                         <div>
@@ -151,12 +151,12 @@ export function Header() {
                   </>
                 )}
                 
-                <DropdownMenuItem onClick={logout} className="text-red-600 py-3 focus:bg-red-50">
+                <DropdownMenuItem onClick={logout} className="text-red-600 py-3 focus:bg-red-50 cursor-pointer hover:bg-red-50">
                   <div className="flex items-center space-x-3">
                     <span className="text-lg">🚪</span>
                     <div>
                       <div className="font-medium">Sign Out</div>
-                      <div className="text-xs text-gray-500">End your session</div>
+                      <div className="text-xs text-gray-500">End your session safely</div>
                     </div>
                   </div>
                 </DropdownMenuItem>
