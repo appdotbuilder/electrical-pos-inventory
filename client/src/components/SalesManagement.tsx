@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, ShoppingCart, Calendar, Truck } from 'lucide-react';
+import { Toaster, toast } from 'sonner';
 import { trpc } from '@/utils/trpc';
 import { useState, useEffect, useCallback } from 'react';
 import type { Sale, CreateSaleInput, Product, Warehouse, User } from '../../../server/src/schema';
@@ -89,24 +90,64 @@ export function SalesManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.items.length === 0) return;
+
+    // Basic validation for common fields
+    if (formData.warehouse_id === 0) {
+      toast.error('Please select a warehouse/store.');
+      return;
+    }
+    if (formData.items.length === 0) {
+      toast.error('Please add at least one item to the sale.');
+      return;
+    }
+
+    // Specific validation for POS vs. Online
+    if (activeTab === 'pos' && selectedCashierId === null) {
+      toast.error('Please select a salesperson for physical store sales.');
+      return;
+    }
+    if (activeTab === 'online') {
+      if (!formData.tracking_number) {
+        toast.error('Tracking number is required for online orders.');
+        return;
+      }
+      if (!formData.customer_name) {
+        toast.error('Customer name is required for online orders.');
+        return;
+      }
+    }
+
+    setIsLoading(true);
 
     try {
       const saleData = selectedCashierId ? { ...formData, cashierId: selectedCashierId } : formData;
       const response = await trpc.createSale.mutate(saleData);
-      setSales((prev: Sale[]) => [...prev, response]);
+      setSales((prev: Sale[]) => [response, ...prev]); // Add new sale to the top
+
+      // Reset form after successful submission
       setFormData({
         warehouse_id: 0,
         customer_name: null,
         customer_contact: null,
-        sale_type: 'RETAIL',
+        sale_type: 'RETAIL', // Default to retail for POS after submission
         tracking_number: null,
         notes: null,
         items: []
       });
-      setSelectedCashierId(null);
+      setCurrentItem({
+        product_id: 0,
+        quantity: 1,
+        unit_price: 0,
+        discount_amount: 0
+      });
+      setSelectedCashierId(null); // Reset selected cashier
+
+      toast.success(`Sale ${response.sale_number} created successfully!`);
     } catch (error) {
       console.error('Failed to create sale:', error);
+      toast.error(`Failed to create sale: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -215,7 +256,7 @@ export function SalesManagement() {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a salesperson" />
+                          <SelectValue placeholder="Select a salesperson (required)" />
                         </SelectTrigger>
                         <SelectContent>
                           {users
@@ -639,6 +680,7 @@ export function SalesManagement() {
           </Card>
         </TabsContent>
       </Tabs>
+      <Toaster />
     </div>
   );
 }
