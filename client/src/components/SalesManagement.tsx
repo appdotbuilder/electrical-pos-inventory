@@ -215,7 +215,7 @@ export function SalesManagement() {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select salesperson" />
+                          <SelectValue placeholder="Select a salesperson" />
                         </SelectTrigger>
                         <SelectContent>
                           {users
@@ -551,7 +551,7 @@ export function SalesManagement() {
                 <Button
                   type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700"
-                  disabled={formData.items.length === 0 || !formData.tracking_number}
+                  disabled={formData.items.length === 0 || formData.warehouse_id === 0 || !formData.tracking_number || !formData.customer_name}
                 >
                   Create Online Order - Rp {calculateTotal().toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Button>
