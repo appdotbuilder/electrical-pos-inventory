@@ -5,39 +5,23 @@ import { eq } from 'drizzle-orm';
 
 export const updateCustomer = async (input: UpdateCustomerInput): Promise<Customer> => {
   try {
-    // Build update data object, only including provided fields
-    const updateData: Record<string, any> = {};
-
-    if (input.name !== undefined) {
-      updateData['name'] = input.name;
-    }
-    if (input.contact_person !== undefined) {
-      updateData['contact_person'] = input.contact_person;
-    }
-    if (input.email !== undefined) {
-      updateData['email'] = input.email;
-    }
-    if (input.phone !== undefined) {
-      updateData['phone'] = input.phone;
-    }
-    if (input.address !== undefined) {
-      updateData['address'] = input.address;
-    }
-    if (input.term_time !== undefined) {
-      updateData['term_time'] = input.term_time;
-    }
+    const updateData: any = {};
+    
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.contact_person !== undefined) updateData.contact_person = input.contact_person;
+    if (input.email !== undefined) updateData.email = input.email;
+    if (input.phone !== undefined) updateData.phone = input.phone;
+    if (input.address !== undefined) updateData.address = input.address;
+    if (input.term_time !== undefined) updateData.term_time = input.term_time;
     if (input.receivable_limit !== undefined) {
-      updateData['receivable_limit'] = input.receivable_limit ? input.receivable_limit.toString() : null;
+      updateData.receivable_limit = input.receivable_limit ? input.receivable_limit.toString() : null;
     }
     if (input.special_discount !== undefined) {
-      updateData['special_discount'] = input.special_discount ? input.special_discount.toString() : null;
+      updateData.special_discount = input.special_discount ? input.special_discount.toString() : null;
     }
-    if (input.is_active !== undefined) {
-      updateData['is_active'] = input.is_active;
-    }
-
-    // Always update the updated_at timestamp
-    updateData['updated_at'] = new Date();
+    if (input.is_active !== undefined) updateData.is_active = input.is_active;
+    
+    updateData.updated_at = new Date();
 
     const result = await db.update(customersTable)
       .set(updateData)
@@ -46,12 +30,10 @@ export const updateCustomer = async (input: UpdateCustomerInput): Promise<Custom
       .execute();
 
     if (result.length === 0) {
-      throw new Error(`Customer with ID ${input.id} not found`);
+      throw new Error('Customer not found');
     }
 
     const customer = result[0];
-
-    // Convert numeric fields back to numbers before returning
     return {
       ...customer,
       receivable_limit: customer.receivable_limit ? parseFloat(customer.receivable_limit) : null,
