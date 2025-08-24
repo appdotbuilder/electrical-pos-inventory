@@ -39,7 +39,7 @@ export function StockTransfers() {
       
       const [transfersData, productsData, warehousesData] = await Promise.all([
         trpc.getStockTransfers.query({ status: statusParam }),
-        trpc.getProducts.query(),
+        trpc.getProducts.query({ is_active: true }),
         trpc.getWarehouses.query()
       ]);
       

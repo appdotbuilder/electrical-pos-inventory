@@ -17,7 +17,8 @@ import {
   updateInventoryInputSchema,
   salesReportInputSchema,
   profitReportInputSchema,
-  loginInputSchema
+  loginInputSchema,
+  getProductsInputSchema
 } from './schema';
 
 // Import handlers
@@ -101,7 +102,8 @@ const appRouter = router({
     .mutation(({ input }) => deleteProduct(input)),
   
   getProducts: publicProcedure
-    .query(() => getProducts()),
+    .input(getProductsInputSchema)
+    .query(({ input }) => getProducts(input)),
 
   // Inventory management
   updateInventory: publicProcedure

@@ -43,7 +43,8 @@ export function SalesManagement() {
       setIsLoading(true);
       const [salesData, productsData, warehousesData, usersData] = await Promise.all([
         trpc.getSales.query({}),
-        trpc.getProducts.query(),
+        // Fetch only active products for sales
+        trpc.getProducts.query({ is_active: true }),
         trpc.getWarehouses.query(),
         trpc.getUsers.query()
       ]);

@@ -36,7 +36,7 @@ export function InventoryManagement() {
       
       const [inventoryData, productsData, warehousesData] = await Promise.all([
         trpc.getInventory.query({ warehouseId }),
-        trpc.getProducts.query(),
+        trpc.getProducts.query({ is_active: true }),
         trpc.getWarehouses.query()
       ]);
       

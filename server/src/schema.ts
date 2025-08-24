@@ -361,3 +361,11 @@ export const loginResponseSchema = z.object({
 });
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
+
+// Get products input schema
+export const getProductsInputSchema = z.object({
+  is_active: z.boolean().optional(),
+  include_all: z.boolean().optional()
+});
+
+export type GetProductsInput = z.infer<typeof getProductsInputSchema>;

@@ -49,7 +49,8 @@ export function ProductManagement() {
   const loadProducts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const result = await trpc.getProducts.query();
+      // Fetch all products (active and inactive) for the catalog
+      const result = await trpc.getProducts.query({ include_all: true });
       setProducts(result);
     } catch (error) {
       console.error('Failed to load products:', error);
