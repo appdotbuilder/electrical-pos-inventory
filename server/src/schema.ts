@@ -214,6 +214,24 @@ export const accountTransactionSchema = z.object({
 
 export type AccountTransaction = z.infer<typeof accountTransactionSchema>;
 
+// Customer schema
+export const customerSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  contact_person: z.string().nullable(),
+  email: z.string().email().nullable(),
+  phone: z.string().nullable(),
+  address: z.string().nullable(),
+  term_time: z.number().int().min(0).nullable(), // e.g., 30 days, 60 days
+  receivable_limit: z.number().min(0).nullable(), // credit limit
+  special_discount: z.number().min(0).max(100).nullable(), // percentage discount
+  is_active: z.boolean(),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
+});
+
+export type Customer = z.infer<typeof customerSchema>;
+
 // Input schemas for creating entities
 export const createUserInputSchema = z.object({
   username: z.string().min(3),
@@ -383,3 +401,46 @@ export const cancelStockTransferInputSchema = z.object({
 });
 
 export type CancelStockTransferInput = z.infer<typeof cancelStockTransferInputSchema>;
+
+// Customer input schemas
+export const createCustomerInputSchema = z.object({
+  name: z.string().min(1, 'Customer name is required'),
+  contact_person: z.string().nullable().optional(),
+  email: z.string().email('Invalid email address').nullable().optional(),
+  phone: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  term_time: z.number().int().min(0, 'Term time cannot be negative').nullable().optional(),
+  receivable_limit: z.number().min(0, 'Receivable limit cannot be negative').nullable().optional(),
+  special_discount: z.number().min(0).max(100, 'Special discount must be between 0 and 100').nullable().optional(),
+  is_active: z.boolean().optional().default(true),
+});
+
+export type CreateCustomerInput = z.infer<typeof createCustomerInputSchema>;
+
+export const updateCustomerInputSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, 'Customer name is required').optional(),
+  contact_person: z.string().nullable().optional(),
+  email: z.string().email('Invalid email address').nullable().optional(),
+  phone: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  term_time: z.number().int().min(0, 'Term time cannot be negative').nullable().optional(),
+  receivable_limit: z.number().min(0, 'Receivable limit cannot be negative').nullable().optional(),
+  special_discount: z.number().min(0).max(100, 'Special discount must be between 0 and 100').nullable().optional(),
+  is_active: z.boolean().optional(),
+});
+
+export type UpdateCustomerInput = z.infer<typeof updateCustomerInputSchema>;
+
+export const deleteCustomerInputSchema = z.object({
+  id: z.number(),
+});
+
+export type DeleteCustomerInput = z.infer<typeof deleteCustomerInputSchema>;
+
+export const getCustomersInputSchema = z.object({
+  is_active: z.boolean().optional(),
+  search_query: z.string().optional(),
+});
+
+export type GetCustomersInput = z.infer<typeof getCustomersInputSchema>;

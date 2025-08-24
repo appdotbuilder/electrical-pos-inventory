@@ -1,169 +1,133 @@
-:root {
-  --background: #fff;
-  --text: #000;
-  --text-secondary: #666;
-  --spinner-border: #000;
-  --spinner-border-top: transparent;
-  --dot-color: #000;
-  --grid-color: rgba(0,0,0,0.05);
-  --gradient-color: rgba(0,0,0,0.03);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-      --background: #000;
-      --text: #fff;
-      --text-secondary: #888;
-      --spinner-border: #fff;
-      --spinner-border-top: transparent;
-      --dot-color: #fff;
-      --grid-color: rgba(255,255,255,0.05);
-      --gradient-color: rgba(255,255,255,0.03);
-  }
-}
-* {
+/* Base styles for the POS application */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--background);
-  color: var(--text);
-  padding: 20px;
-  line-height: 1.5;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
-.container {
-  text-align: center;
-  max-width: 600px;
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
 }
-h1.title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  letter-spacing: -0.02em;
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
 }
-p.description {
-  font-size: 1.125rem;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
 }
-.spinner {
-  width: 40px;
-  height: 40px;
-  margin: 2rem auto;
-  position: relative;
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
-.spinner::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 2px solid var(--spinner-border);
-  border-top-color: var(--spinner-border-top);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+
+/* Smooth transitions for interactive elements */
+.transition-all {
+  transition: all 0.3s ease;
 }
-.dots {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 2rem;
+
+/* Custom button hover effects */
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-.dot {
-  width: 4px;
-  height: 4px;
-  background: var(--dot-color);
-  border-radius: 50%;
-  animation: fade 1.4s infinite ease-in-out;
+
+/* Card hover effects */
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
-.dot:nth-child(1) { animation-delay: -0.32s; }
-.dot:nth-child(2) { animation-delay: -0.16s; }
+
+/* Loading animation */
 @keyframes spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes fade {
-  0%, 80%, 100% { opacity: 0; }
-  40% { opacity: 1; }
-}
-.grid {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  background-image: 
-      linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
-  background-size: 24px 24px;
-  transition: background-image 0.3s ease;
-}
-.gradient {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -2;
-  background: radial-gradient(circle at center, var(--gradient-color) 0%, transparent 50%);
-  transition: background 0.3s ease;
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.footer {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.footer-link {
-  color: var(--text);
-  text-decoration: none;
-  font-weight: bold;
-}
-
-/* Authentication and App specific styles */
-.auth-spinner {
-  width: 60px;
-  height: 60px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #667eea;
-  border-radius: 50%;
+.loading-spinner {
   animation: spin 1s linear infinite;
-  margin: 2rem auto;
 }
 
-/* Login page background enhancement */
-.login-bg {
+/* Gradient text effects */
+.gradient-text {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Dashboard welcome enhancement */
-.welcome-gradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* Custom focus rings */
+.focus-ring:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
 }
 
-/* Role-based badge colors */
-.badge-admin {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+/* Status badge styles */
+.status-active {
+  background-color: #10b981;
+  color: white;
 }
 
-.badge-manager {
-  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+.status-inactive {
+  background-color: #6b7280;
+  color: white;
 }
 
-.badge-cashier {
-  background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .mobile-stack > * {
+    width: 100% !important;
+  }
 }
 
-.badge-warehouse {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+/* Electric theme colors */
+.electric-blue {
+  color: #00d4ff;
+}
+
+.electric-yellow {
+  color: #ffed00;
+}
+
+.electric-purple {
+  color: #8b5cf6;
+}
+
+/* Glass morphism effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Custom animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
 }

@@ -204,6 +204,26 @@ export const packingTable = pgTable('packing', {
   saleIdx: unique().on(table.sale_id)
 }));
 
+// Customers table
+export const customersTable = pgTable('customers', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 200 }).notNull(),
+  contact_person: varchar('contact_person', { length: 100 }),
+  email: varchar('email', { length: 100 }),
+  phone: varchar('phone', { length: 50 }),
+  address: text('address'),
+  term_time: integer('term_time'), // in days
+  receivable_limit: numeric('receivable_limit', { precision: 12, scale: 2 }),
+  special_discount: numeric('special_discount', { precision: 5, scale: 2 }),
+  is_active: boolean('is_active').notNull().default(true),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull()
+}, (table) => ({
+  nameIdx: index('customers_name_idx').on(table.name),
+  emailIdx: index('customers_email_idx').on(table.email),
+  phoneIdx: index('customers_phone_idx').on(table.phone)
+}));
+
 // Account transactions table
 export const accountTransactionsTable = pgTable('account_transactions', {
   id: serial('id').primaryKey(),
@@ -348,6 +368,10 @@ export const packingRelations = relations(packingTable, ({ one }) => ({
   })
 }));
 
+export const customersRelations = relations(customersTable, ({ many }) => ({
+  // Future relation to sales could be added when sales table is updated to reference customer_id
+}));
+
 export const accountTransactionsRelations = relations(accountTransactionsTable, ({ one }) => ({
   createdBy: one(usersTable, {
     fields: [accountTransactionsTable.created_by],
@@ -380,5 +404,6 @@ export const tables = {
   stockTransfers: stockTransfersTable,
   stockTransferItems: stockTransferItemsTable,
   packing: packingTable,
+  customers: customersTable,
   accountTransactions: accountTransactionsTable
 };

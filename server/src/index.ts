@@ -20,7 +20,11 @@ import {
   loginInputSchema,
   getProductsInputSchema,
   getStockTransferDetailsInputSchema,
-  cancelStockTransferInputSchema
+  cancelStockTransferInputSchema,
+  createCustomerInputSchema,
+  updateCustomerInputSchema,
+  deleteCustomerInputSchema,
+  getCustomersInputSchema
 } from './schema';
 
 // Import handlers
@@ -49,6 +53,10 @@ import { requireAuth, requireManagerOrAbove } from './handlers/auth_middleware';
 import { seedTestData } from './handlers/seed_test_data';
 import { getStockTransferDetails } from './handlers/get_stock_transfer_details';
 import { cancelStockTransfer } from './handlers/cancel_stock_transfer';
+import { createCustomer } from './handlers/create_customer';
+import { updateCustomer } from './handlers/update_customer';
+import { deleteCustomer } from './handlers/delete_customer';
+import { getCustomers } from './handlers/get_customers';
 import { z } from 'zod';
 
 const t = initTRPC.create({
@@ -177,6 +185,23 @@ const appRouter = router({
   getDashboardSummary: publicProcedure
     .input(z.object({ token: z.string().optional() }).optional())
     .query(({ input }) => getDashboardSummary(input?.token)),
+
+  // Customer management
+  createCustomer: publicProcedure
+    .input(createCustomerInputSchema)
+    .mutation(({ input }) => createCustomer(input)),
+  
+  updateCustomer: publicProcedure
+    .input(updateCustomerInputSchema)
+    .mutation(({ input }) => updateCustomer(input)),
+  
+  deleteCustomer: publicProcedure
+    .input(deleteCustomerInputSchema)
+    .mutation(({ input }) => deleteCustomer(input)),
+  
+  getCustomers: publicProcedure
+    .input(getCustomersInputSchema.optional())
+    .query(({ input }) => getCustomers(input || {})),
 });
 
 export type AppRouter = typeof appRouter;
