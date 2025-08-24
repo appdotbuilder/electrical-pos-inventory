@@ -369,3 +369,17 @@ export const getProductsInputSchema = z.object({
 });
 
 export type GetProductsInput = z.infer<typeof getProductsInputSchema>;
+
+// Stock transfer details input schema
+export const getStockTransferDetailsInputSchema = z.object({
+  id: z.number(),
+});
+
+export type GetStockTransferDetailsInput = z.infer<typeof getStockTransferDetailsInputSchema>;
+
+// Cancel stock transfer input schema
+export const cancelStockTransferInputSchema = z.object({
+  id: z.number(),
+});
+
+export type CancelStockTransferInput = z.infer<typeof cancelStockTransferInputSchema>;

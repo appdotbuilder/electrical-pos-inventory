@@ -18,7 +18,9 @@ import {
   salesReportInputSchema,
   profitReportInputSchema,
   loginInputSchema,
-  getProductsInputSchema
+  getProductsInputSchema,
+  getStockTransferDetailsInputSchema,
+  cancelStockTransferInputSchema
 } from './schema';
 
 // Import handlers
@@ -45,6 +47,8 @@ import { login } from './handlers/login';
 import { getMe } from './handlers/get_me';
 import { requireAuth, requireManagerOrAbove } from './handlers/auth_middleware';
 import { seedTestData } from './handlers/seed_test_data';
+import { getStockTransferDetails } from './handlers/get_stock_transfer_details';
+import { cancelStockTransfer } from './handlers/cancel_stock_transfer';
 import { z } from 'zod';
 
 const t = initTRPC.create({
@@ -133,8 +137,19 @@ const appRouter = router({
     .mutation(({ input }) => createStockTransfer(input, input.requestedBy)),
   
   getStockTransfers: publicProcedure
-    .input(z.object({ status: z.string().optional() }))
-    .query(({ input }) => getStockTransfers(input.status)),
+    .input(z.object({ 
+      status: z.string().optional(),
+      include_cancelled: z.boolean().optional().default(false)
+    }))
+    .query(({ input }) => getStockTransfers(input.status, input.include_cancelled)),
+
+  getStockTransferDetails: publicProcedure
+    .input(getStockTransferDetailsInputSchema)
+    .query(({ input }) => getStockTransferDetails(input)),
+
+  cancelStockTransfer: publicProcedure
+    .input(cancelStockTransferInputSchema)
+    .mutation(({ input }) => cancelStockTransfer(input)),
 
   // Packing management
   getPackingList: publicProcedure

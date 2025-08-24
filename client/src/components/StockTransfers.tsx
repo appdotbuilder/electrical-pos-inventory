@@ -5,12 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, ArrowRightLeft, Package, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, ArrowRightLeft, Package, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { trpc } from '@/utils/trpc';
 import { useState, useEffect, useCallback } from 'react';
 import type { StockTransfer, CreateStockTransferInput, Product, Warehouse } from '../../../server/src/schema';
+import type { StockTransferDetail } from '../../../server/src/handlers/get_stock_transfer_details';
 
 export function StockTransfers() {
   const [transfers, setTransfers] = useState<StockTransfer[]>([]);
@@ -18,7 +21,11 @@ export function StockTransfers() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [selectedTransfer, setSelectedTransfer] = useState<StockTransferDetail | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [includeCancelled, setIncludeCancelled] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   
   const [formData, setFormData] = useState<CreateStockTransferInput>({
     from_warehouse_id: 0,
@@ -38,7 +45,7 @@ export function StockTransfers() {
       const statusParam = statusFilter === 'all' ? undefined : statusFilter;
       
       const [transfersData, productsData, warehousesData] = await Promise.all([
-        trpc.getStockTransfers.query({ status: statusParam }),
+        trpc.getStockTransfers.query({ status: statusParam, include_cancelled: includeCancelled }),
         trpc.getProducts.query({ is_active: true }),
         trpc.getWarehouses.query()
       ]);
@@ -51,7 +58,7 @@ export function StockTransfers() {
     } finally {
       setIsLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, includeCancelled]);
 
   useEffect(() => {
     loadData();
@@ -69,6 +76,28 @@ export function StockTransfers() {
       product_id: 0,
       requested_quantity: 1
     });
+  };
+
+  const handleViewDetails = async (transferId: number) => {
+    try {
+      const details = await trpc.getStockTransferDetails.query({ id: transferId });
+      setSelectedTransfer(details);
+      setIsDetailsDialogOpen(true);
+    } catch (error) {
+      console.error('Failed to load transfer details:', error);
+    }
+  };
+
+  const handleCancelTransfer = async (transferId: number) => {
+    try {
+      setIsCancelling(true);
+      await trpc.cancelStockTransfer.mutate({ id: transferId });
+      loadData(); // Reload data to reflect cancellation
+    } catch (error) {
+      console.error('Failed to cancel stock transfer:', error);
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -327,6 +356,14 @@ export function StockTransfers() {
                 <SelectItem value="CANCELLED">Cancelled</SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="include-cancelled"
+                checked={includeCancelled}
+                onCheckedChange={(checked: boolean | 'indeterminate') => setIncludeCancelled(!!checked)}
+              />
+              <Label htmlFor="include-cancelled">Show Cancelled</Label>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -428,8 +465,10 @@ export function StockTransfers() {
                   const fromWarehouse = warehouses.find((w: Warehouse) => w.id === transfer.from_warehouse_id);
                   const toWarehouse = warehouses.find((w: Warehouse) => w.id === transfer.to_warehouse_id);
 
+                  const canCancel = transfer.status === 'PENDING' || transfer.status === 'IN_TRANSIT';
+
                   return (
-                    <TableRow key={transfer.id}>
+                    <TableRow key={transfer.id} className={transfer.status === 'CANCELLED' ? 'text-gray-400 italic' : ''}>
                       <TableCell className="font-mono">{transfer.transfer_number}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -461,13 +500,32 @@ export function StockTransfers() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleViewDetails(transfer.id)}>
                             View Details
                           </Button>
-                          {transfer.status === 'PENDING' && (
-                            <Button variant="outline" size="sm">
-                              Approve
-                            </Button>
+                          {canCancel && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="sm" disabled={isCancelling}>
+                                  {isCancelling ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4 mr-1" />}
+                                  Cancel
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure you want to cancel this transfer?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. The transfer status will be marked as CANCELLED, and it will remain in the history as a log.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Keep Transfer</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleCancelTransfer(transfer.id)}>
+                                    Yes, Cancel Transfer
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           )}
                         </div>
                       </TableCell>
@@ -479,6 +537,87 @@ export function StockTransfers() {
           )}
         </CardContent>
       </Card>
+
+      {/* Stock Transfer Details Dialog */}
+      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Stock Transfer Details</DialogTitle>
+            <DialogDescription>Comprehensive view of the selected stock transfer</DialogDescription>
+          </DialogHeader>
+          {selectedTransfer ? (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <p className="text-sm font-medium">Transfer #:</p>
+                <p className="text-sm font-mono">{selectedTransfer.transfer_number}</p>
+                
+                <p className="text-sm font-medium">Status:</p>
+                <Badge variant={getStatusColor(selectedTransfer.status)} className="w-fit">{selectedTransfer.status}</Badge>
+
+                <p className="text-sm font-medium">From Warehouse:</p>
+                <p className="text-sm">{selectedTransfer.fromWarehouse?.name} ({selectedTransfer.fromWarehouse?.type})</p>
+
+                <p className="text-sm font-medium">To Warehouse:</p>
+                <p className="text-sm">{selectedTransfer.toWarehouse?.name} ({selectedTransfer.toWarehouse?.type})</p>
+
+                <p className="text-sm font-medium">Requested By:</p>
+                <p className="text-sm">User ID: {selectedTransfer.requested_by}</p>
+                
+                <p className="text-sm font-medium">Requested Date:</p>
+                <p className="text-sm">{selectedTransfer.created_at.toLocaleDateString()}</p>
+                
+                {selectedTransfer.transfer_date && (
+                  <>
+                    <p className="text-sm font-medium">Transfer Date:</p>
+                    <p className="text-sm">{selectedTransfer.transfer_date.toLocaleDateString()}</p>
+                  </>
+                )}
+                {selectedTransfer.notes && (
+                  <>
+                    <p className="text-sm font-medium">Notes:</p>
+                    <p className="text-sm">{selectedTransfer.notes}</p>
+                  </>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <h4 className="font-semibold text-lg mb-2">Items Transferred</h4>
+                {selectedTransfer.items.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No items in this transfer.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Requested Qty</TableHead>
+                        <TableHead>Transferred Qty</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedTransfer.items.map((item, itemIndex) => (
+                        <TableRow key={itemIndex}>
+                          <TableCell>{item.product?.name} ({item.product?.sku})</TableCell>
+                          <TableCell>{item.requested_quantity}</TableCell>
+                          <TableCell>{item.transferred_quantity !== null ? item.transferred_quantity : '-'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p>Loading transfer details...</p>
+          )}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
